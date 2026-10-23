@@ -62,7 +62,58 @@ int carregarUnidades(const char nomeArquivo[], int unidadeIds[], char descricoes
     // 6. Fecha o arquivo e retorna a quantidade de registros carregados
     fclose(arquivo);
     return registrosCarregados;
-}               
+}
+
+int carregarLeituras(const char nomeArquivo[], 
+                    int ids[],
+                    int unidadeIds[],
+                    int meses[],
+                    int anos[],
+                    float consumos[],
+                    int max){
+    
+    FILE *leitura = fopen(nomeArquivo, "r");
+    
+    if(leitura == NULL){
+        printf("Erro ao abrir arquivo %s.\n", nomeArquivo);
+        return -1;
+    }
+    
+    int i = 0;
+    while(i < max && fscanf(leitura, "%d %d %d %d %f", 
+                            &ids[i],
+                            &unidadeIds[i],
+                            &meses[i],
+                            &anos[i],
+                            &consumos[i]) == 5){
+        i++;
+    }
+    
+    fclose(leitura);
+    return i;
+}
+
+int buscaBinaria(int ids[], int n, int idProcurado){
+    int inicio = 0;
+    int fim = n - 1;
+    
+    while(inicio <= fim){
+        int meio = inicio + (fim - inicio)/2;
+        
+        if(ids[meio] == idProcurado){
+            return meio;
+        }
+        if(ids[meio] < idProcurado){
+            inicio = meio + 1;
+        }
+        else{
+            fim = meio - 1;
+        }
+    }
+    
+    return -1;
+}
+
 int main(){
     carregarUnidades("unidades.csv", unidadeIds, descricoes, MAX);
     for(int i = 0; i < 3; i++ ){

@@ -9,12 +9,8 @@ int meses[MAX];
 int anos[MAX];
 float consumos[MAX];
 
-int produtoIdsCatalogo[MAX];
+int unidadeIdsCatalogo[MAX];
 char descricoes[MAX][50];
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 int carregarUnidades(const char nomeArquivo[], int unidadeIds[], char descricoes[][50], int max) {
     // Abre o arquivo em modo de leitura
@@ -29,9 +25,9 @@ int carregarUnidades(const char nomeArquivo[], int unidadeIds[], char descricoes
     int registrosCarregados = 0;
 
     // Lê o arquivo linha por linha até o fim ou até atingir o limite 'max'
-    while (fgets(linha, sizeof(linha), arquivo) && registrosCarregados < max) {
+    while (registrosCarregados < max && fgets(linha, sizeof(linha), arquivo)) {
         // Remove a quebra de linha (\n) do final, se existir
-        linha[strcspn(linha, "\n")] = 0;
+        linha[strcspn(linha, "\r\n")] = 0;
 
         // Ignora linhas vazias que possam estar no arquivo
         if (strlen(linha) == 0) {
@@ -75,7 +71,6 @@ int carregarLeituras(const char nomeArquivo[],
     FILE *leitura = fopen(nomeArquivo, "r");
     
     if(leitura == NULL){
-        printf("Erro ao abrir arquivo %s.\n", nomeArquivo);
         return -1;
     }
     
@@ -114,8 +109,45 @@ int buscaBinaria(int ids[], int n, int idProcurado){
     return -1;
 }
 
+float calcularConsumoUnidade(int unidadeIds[],
+                            float consumos[],
+                            int n,
+                            int unidadeId){
+    float consumoTotal = 0;
+
+    for(int i = 0; i < n; i++){
+        if(unidadeIds[i] == unidadeId){
+            consumoTotal += consumos[i];
+        }
+    }
+
+    return consumoTotal;
+}
+
+float calcularConsumoPeriodo(int meses[],
+                            int anos[],
+                            float consumos[],
+                            int n,
+                            int mesInicial,
+                            int anoInicial,
+                            int mesFinal,
+                            int anoFinal){
+    float consumoTotal = 0;
+    int inicio = anoInicial * 12 + mesInicial;
+    int fim = anoFinal * 12 + mesFinal;
+
+    for(int i = 0; i < n; i++){
+        int atual = anos[i] * 12 + meses[i];
+        if(atual >= inicio && atual <= fim){
+            consumoTotal += consumos[i];
+        }
+    }
+
+    return consumoTotal;
+}
+
 int main(){
-    carregarUnidades("unidades.csv", unidadeIds, descricoes, MAX);
+    carregarUnidades("unidades.csv", unidadeIdsCatalogo, descricoes, MAX);
     for(int i = 0; i < 3; i++ ){
         printf("%d",unidadeIds[i]); 
         printf(" %s\n", descricoes[i]);

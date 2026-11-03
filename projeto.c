@@ -12,11 +12,9 @@ float consumos[MAX];
 int unidadeIdsCatalogo[MAX];
 char descricoes[MAX][50];
 
-int carregarUnidades(const char nomeArquivo[], int unidadeIds[], char descricoes[][50], int max) {
-    // Abre o arquivo em modo de leitura
+int carregarUnidades(const char nomeArquivo[], int unidadeIdsCatalogo[], char descricoes[][50], int max) {
     FILE* arquivo = fopen(nomeArquivo, "r");
     
-    // Retorna -1 se houver erro ao abrir o arquivo
     if (arquivo == NULL) {
         return -1;
     }
@@ -24,38 +22,27 @@ int carregarUnidades(const char nomeArquivo[], int unidadeIds[], char descricoes
     char linha[max];
     int registrosCarregados = 0;
 
-    // Lê o arquivo linha por linha até o fim ou até atingir o limite 'max'
     while (registrosCarregados < max && fgets(linha, sizeof(linha), arquivo)) {
-        // Remove a quebra de linha (\n) do final, se existir
         linha[strcspn(linha, "\r\n")] = 0;
 
-        // Ignora linhas vazias que possam estar no arquivo
         if (strlen(linha) == 0) {
             continue;
         }
 
-        // Separa o primeiro elemento: ID da Unidade
         char* token = strtok(linha, ";");
         if (token != NULL) {
-            unidadeIds[registrosCarregados] = atoi(token); // Converte para int
+            unidadeIdsCatalogo[registrosCarregados] = atoi(token); 
             
-            // 5. Separa o segundo elemento: Descrição
             token = strtok(NULL, ";");
             if (token != NULL) {
-                // Copia com segurança limitando a 49 caracteres (+1 do \0)
                 strncpy(descricoes[registrosCarregados], token, 49);
-                descricoes[registrosCarregados][49] = '\0'; // Garante o fim da string
+                descricoes[registrosCarregados][49] = '\0'; 
             } else {
-                // Caso o arquivo tenha o ID mas falte a descrição
                 descricoes[registrosCarregados][0] = '\0';
             }
-
-            // Incrementa o contador de registros bem-sucedidos
             registrosCarregados++;
         }
     }
-
-    // 6. Fecha o arquivo e retorna a quantidade de registros carregados
     fclose(arquivo);
     return registrosCarregados;
 }
@@ -145,12 +132,57 @@ float calcularConsumoPeriodo(int meses[],
 
     return consumoTotal;
 }
+void trocar_int(int *x, int *y) {
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
+void trocar_float(float *x, float *y){
+    float temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+void quickLeituraPorId(int ids[], int unidadeIds[], int meses[],int anos[],float consumos[],int inicio,int fim){
+    if (inicio >= fim){
+        return;
+    }
+    int pivo = ids[fim];
+    int i = inicio;
+
+    for(int j = inicio; j < fim; j++){
+        if(ids[j] < pivo){
+            trocar_int(&ids[i], &ids[j]);
+            trocar_int(&unidadeIds[i], &unidadeIds[j]);
+            trocar_int(&meses[i], &meses[j]);
+            trocar_int(&anos[i], &anos[j]);
+            trocar_float(&consumos[i], &consumos[j]);
+            i++;
+        }
+    }
+    trocar_int(&ids[i], &ids[fim]);
+    trocar_int(&unidadeIds[i], &unidadeIds[fim]);
+    trocar_int(&meses[i], &meses[fim]);
+    trocar_int(&anos[i], &anos[fim]);
+    trocar_float(&consumos[i], &consumos[fim]);
+    int p = i;
+    quickLeituraPorId(ids, unidadeIds, meses, anos, consumos, inicio, p - 1);
+    quickLeituraPorId(ids, unidadeIds, meses, anos, consumos, p + 1, fim);
+
+
+}
 
 int main(){
     carregarUnidades("unidades.csv", unidadeIdsCatalogo, descricoes, MAX);
     for(int i = 0; i < 3; i++ ){
-        printf("%d",unidadeIds[i]); 
+        printf("%d",unidadeIdsCatalogo[i]); 
         printf(" %s\n", descricoes[i]);
         
+    }
+    int total_leituras = carregarLeituras("leituras.txt", ids, unidadeIds, meses, anos, consumos, MAX);
+    quickLeituraPorId(ids, unidadeIds, meses, anos, consumos, 0, total_leituras - 1);
+    for(int i = 0; i < total_leituras; i++){
+        printf("%d %d %d %d %.1f \n", ids[i], unidadeIds[i], meses[i], anos[i], consumos[i]);
+
     }
 }

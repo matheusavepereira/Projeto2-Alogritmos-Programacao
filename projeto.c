@@ -143,6 +143,69 @@ void trocar_float(float *x, float *y){
     *y = temp;
 }
 
+void bubbleSortLeituraPorId(int ids[], int unidadeIds[], int meses[], int anos[], float consumos[], int n){
+    int trocou = 0;
+    for(int i = 0; i < n -1; i++){
+        for(int j = 0; j < n - 1; j++){
+            if(ids[j] > ids[j + 1]){
+                trocar_int(&ids[j], &ids[j + 1]);
+                trocar_int(&unidadeIds[j], &unidadeIds[j + 1]);
+                trocar_int(&meses[j], &meses[j + 1]);
+                trocar_int(&anos[j], &anos[j + 1]);
+                trocar_float(&consumos[j], &consumos[j + 1]);
+                trocou = 1;
+            }
+        }
+        if(trocou == 0){
+            return;
+        }
+    }
+}
+
+void insertionSortLeituraPorId(int ids[], int unidadeIds[], int meses[], int anos[], float consumos[], int n){
+    for(int i = 1; i < n; i ++){
+        int chave = ids[i];
+        int chave1 = unidadeIds[i];
+        int chave2 = meses[i];
+        int chave3 = anos[i];
+        float chave4 = consumos[i];
+        int j = i -1;
+        while(j >= 0 && ids[j] > chave){
+            ids[j + 1] = ids[j];
+            unidadeIds[j + 1] = unidadeIds[j];
+            meses[j + 1] = meses[j];
+            anos[j + 1] = anos[j];
+            consumos[j + 1] = consumos[j]; 
+            j = j -1;
+        }
+        ids[j + 1] = chave;
+        unidadeIds[j + 1] = chave1;
+        meses[j + 1] = chave2;
+        anos[j + 1] = chave3;
+        consumos[j + 1] = chave4;
+    }
+
+}
+void selectionSortLeituraPorId(int ids[], int unidadeIds[], int meses[], int anos[], float consumos[], int n){
+    for(int i = 0; i < n; i++){
+        int minimo = i;
+        for(int j = i + 1; j < n;j++){
+            if(ids[j] < ids[minimo]){
+                minimo = j;
+            }
+
+        }
+        if(minimo != i){
+            trocar_int(&ids[minimo], &ids[i]);
+            trocar_int(&unidadeIds[minimo], &unidadeIds[i]);
+            trocar_int(&meses[minimo], &meses[i]);
+            trocar_int(&anos[minimo], &anos[i]);
+            trocar_float(&consumos[minimo], &consumos[i]);
+
+        }
+    }
+}
+
 void quickLeituraPorId(int ids[], int unidadeIds[], int meses[],int anos[],float consumos[],int inicio,int fim){
     if (inicio >= fim){
         return;
@@ -172,6 +235,51 @@ void quickLeituraPorId(int ids[], int unidadeIds[], int meses[],int anos[],float
 
 }
 
+void merge(int v1[],int n1, int v2[], int n2, int dest[]){
+    int i1 = 0;
+    int i2 = 0;
+    int i = 0;
+    while(i1 < n1 && i2 < n2){
+        if(v1[i1] < v2[i2]){
+            dest[i] = v1[i1];
+            i1++;
+        }
+        else{
+            dest[i] = v2[i2];
+            i2++;
+        }
+    i++;
+    }
+    while(i1 < n1){
+        dest[i] = v1[i1];
+        i1++;
+        i++;
+    }
+    while(i2 < n2){
+        dest[i] = v2[i2];
+        i2++;
+        i++;
+
+    }
+}
+void mergeSortLeituraPorId(int ids[], int unidadeIds[], int meses[],int anos[],float consumos[],int inicio,int fim){
+    if(fim < 2) return;
+
+    int meio = fim / 2;
+    int n1 = meio;
+    int v1[n1];
+    for(int i = 0; i<n1; i++){
+        v1[i] = ids[i];
+    }
+    int n2 = fim - meio;
+    int v2[n2];
+    for(int i = 0; i < n2; i ++){
+        v2[i] = ids[meio + i];
+    }
+
+
+
+}
 int main(){
     carregarUnidades("unidades.csv", unidadeIdsCatalogo, descricoes, MAX);
     for(int i = 0; i < 3; i++ ){
@@ -180,7 +288,7 @@ int main(){
         
     }
     int total_leituras = carregarLeituras("leituras.txt", ids, unidadeIds, meses, anos, consumos, MAX);
-    quickLeituraPorId(ids, unidadeIds, meses, anos, consumos, 0, total_leituras - 1);
+    insertionSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, total_leituras);
     for(int i = 0; i < total_leituras; i++){
         printf("%d %d %d %d %.1f \n", ids[i], unidadeIds[i], meses[i], anos[i], consumos[i]);
 

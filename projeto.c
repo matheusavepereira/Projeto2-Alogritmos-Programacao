@@ -1,6 +1,13 @@
+/*
+Bruno Rosa Maia - RA: 10769813
+João Vitor Paro Nunes dos Santos - RA: 10769888
+Matheus Pereira - RA: 1296734
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define MAX 1000
 int ids[MAX];
@@ -96,6 +103,15 @@ int buscaBinaria(int ids[], int n, int idProcurado){
     return -1;
 }
 
+int buscaLinear(int ids[], int n, int idProcurado){
+    for(int i = 0; i < n; i++){
+        if(ids[i] == idProcurado){
+            return i;
+        }
+    }
+    return -1;
+}
+
 float calcularConsumoUnidade(int unidadeIds[],
                             float consumos[],
                             int n,
@@ -132,6 +148,28 @@ float calcularConsumoPeriodo(int meses[],
 
     return consumoTotal;
 }
+
+int encontrarUnidadeMaiorConsumo(int unidadeIds[], float consumos[], int n){
+    if(n <= 0){
+        return -1;
+    }
+    
+    int melhorId = unidadeIds[0];
+    float melhorTotal = calcularConsumoUnidade(unidadeIds, consumos, n, melhorId);
+    
+    for(int i = 1; i < n; i++){
+        int idAtual = unidadeIds[i];
+        float totalAtual = calcularConsumoUnidade(unidadeIds, consumos, n, idAtual);
+        
+        if(totalAtual > melhorTotal || (totalAtual == melhorTotal && idAtual < melhorId)){
+            melhorId = idAtual;
+            melhorTotal = totalAtual;
+        }
+    }
+    
+    return melhorId;
+}
+
 void trocar_int(int *x, int *y) {
     int temp = *x;
     *x = *y;
@@ -144,9 +182,9 @@ void trocar_float(float *x, float *y){
 }
 
 void bubbleSortLeituraPorId(int ids[], int unidadeIds[], int meses[], int anos[], float consumos[], int n){
-    int trocou = 0;
     for(int i = 0; i < n -1; i++){
-        for(int j = 0; j < n - 1; j++){
+        int trocou = 0;
+        for(int j = 0; j < n - 1 - i; j++){
             if(ids[j] > ids[j + 1]){
                 trocar_int(&ids[j], &ids[j + 1]);
                 trocar_int(&unidadeIds[j], &unidadeIds[j + 1]);
@@ -206,7 +244,7 @@ void selectionSortLeituraPorId(int ids[], int unidadeIds[], int meses[], int ano
     }
 }
 
-void quickLeituraPorId(int ids[], int unidadeIds[], int meses[],int anos[],float consumos[],int inicio,int fim){
+void quickSortLeituraPorId(int ids[], int unidadeIds[], int meses[],int anos[],float consumos[],int inicio,int fim){
     if (inicio >= fim){
         return;
     }
@@ -229,8 +267,8 @@ void quickLeituraPorId(int ids[], int unidadeIds[], int meses[],int anos[],float
     trocar_int(&anos[i], &anos[fim]);
     trocar_float(&consumos[i], &consumos[fim]);
     int p = i;
-    quickLeituraPorId(ids, unidadeIds, meses, anos, consumos, inicio, p - 1);
-    quickLeituraPorId(ids, unidadeIds, meses, anos, consumos, p + 1, fim);
+    quickSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, inicio, p - 1);
+    quickSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, p + 1, fim);
 
 
 }
@@ -315,20 +353,177 @@ void mergeSortLeituraPorId(int ids[], int unidadeIds[], int meses[], int anos[],
 }
 
 int main(){
-    carregarUnidades("unidades.csv", unidadeIdsCatalogo, descricoes, MAX);
-    for(int i = 0; i < 3; i++ ){
-        printf("%d",unidadeIdsCatalogo[i]); 
-        printf(" %s\n", descricoes[i]);
-        
+    int total_unidades = carregarUnidades("unidades.csv", unidadeIdsCatalogo, descricoes, MAX);
+    if(total_unidades == -1){
+        printf("Erro ao abrir o arquivo unidades.csv. Encerrando o programa.\n");
+        return 1;
     }
-    int total_leituras = carregarLeituras("leituras.txt", ids, unidadeIds, meses, anos, consumos, MAX);
-
-    mergeSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, 0, MAX - 2);
-
-    insertionSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, total_leituras);
     
-    for(int i = 0; i < total_leituras; i++){
-        printf("%d %d %d %d %.1f \n", ids[i], unidadeIds[i], meses[i], anos[i], consumos[i]);
-
+    int total_leituras = carregarLeituras("leituras.txt", ids, unidadeIds, meses, anos, consumos, MAX);
+    if(total_leituras == -1){
+        printf("Erro ao abrir o arquivo leituras.txt. Encerrando o programa.\n");
+        return 1;
     }
+
+    int opcao;
+    bool ordenado = false;
+
+    do{
+        printf("\n===== SISTEMA DE ANALISE DE CONSUMO DE ENERGIA =====\n");
+        printf("\n1. Mostrar leituras ordenadas por ID");
+        printf("\n2. Buscar leitura por ID");
+        printf("\n3. Calcular consumo de uma unidade");
+        printf("\n4. Calcular consumo em um periodo");
+        printf("\n5. Identificar unidade com maior consumo");
+        printf("\n6. Sair da aplicacao\n");
+        printf("\nEscolha uma opcao: ");
+        scanf("%d", &opcao);
+
+        switch(opcao){
+            case 1:{
+                if(!ordenado){
+                    int ordenacao;
+                    printf("\nEscolha o algoritmo de ordenacao:\n");
+                    printf("\n1. Bubble Sort");
+                    printf("\n2. Insertion Sort");
+                    printf("\n3. Selection Sort");
+                    printf("\n4. Quick Sort");
+                    printf("\n5. Merge Sort\n");
+                    printf("\nOpcao: ");
+                    scanf("%d", &ordenacao);
+
+                    switch(ordenacao){
+                        case 1:
+                            bubbleSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, total_leituras);
+                            break;
+                        case 2:
+                            insertionSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, total_leituras);
+                            break;
+                        case 3:
+                            selectionSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, total_leituras);
+                            break;
+                        case 4:
+                            quickSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, 0, total_leituras - 1);
+                            break;
+                        case 5:
+                            mergeSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, 0, total_leituras - 1);
+                            break;
+                        default:
+                            printf("\nOpcao invalida.\n");
+                            continue;
+                    }
+                    ordenado = true;
+                }
+
+                printf("\nLeituras ordenadas por ID:\n");
+                printf("ID | Unidade | Descricao | Mes | Ano | Consumo (kWh)\n");
+                for(int i = 0; i < total_leituras; i++){
+                    int j = buscaLinear(unidadeIdsCatalogo, total_unidades, unidadeIds[i]);
+                    printf("%d | %d | %s | %d | %d | %.2f\n", ids[i], unidadeIds[i], descricoes[j], meses[i], anos[i], consumos[i]);
+                }
+                break;
+            }
+            case 2:{
+                int idBusca, opcaoBusca, pos;
+
+                printf("\nDigite o ID da leitura: ");
+                scanf("%d", &idBusca);
+                
+                printf("\nEscolha o algoritmo de busca:\n");
+                printf("\n1. Busca linear");
+                printf("\n2. Busca binaria\n");
+                printf("\nOpcao: ");
+                scanf("%d", &opcaoBusca);
+
+                if(opcaoBusca == 1){
+                    pos = buscaLinear(ids, total_leituras, idBusca);
+                }
+                else if(opcaoBusca == 2){
+                    if(!ordenado){
+                        insertionSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, total_leituras);
+                        ordenado = true;
+                    }
+                    pos = buscaBinaria(ids, total_leituras, idBusca);
+                }
+                else{
+                    printf("Opcao invalida.\n");
+                    break;
+                }
+
+                if(pos == -1){
+                    printf("\nLeitura nao encontrada.\n");
+                }
+                else{
+                    int j = buscaLinear(unidadeIdsCatalogo, total_unidades, unidadeIds[pos]);
+                    printf("\nLeitura encontrada:\n");
+                    printf("Unidade: %d\n", unidadeIds[pos]);
+                    printf("Descricao: %s\n", descricoes[j]);
+                    printf("Mes: %d\n", meses[pos]);
+                    printf("Ano: %d\n", anos[pos]);
+                    printf("Consumo: %.2f kWh\n", consumos[pos]);
+                }
+                break;
+            }
+            case 3:{
+                int idUnidade;
+                printf("\nDigite o ID da unidade: ");
+                scanf("%d", &idUnidade);
+                
+                int j = buscaLinear(unidadeIdsCatalogo, total_unidades, idUnidade);
+                if(j == -1){
+                    printf("\nUnidade nao encontrada.\n");
+                }
+                else{
+                    printf("\nConsumo da Unidade:\n");
+                    printf("Unidade: %d\n", idUnidade);
+                    printf("Descricao: %s\n", descricoes[j]);
+                    printf("Consumo total: %.2f kWh\n", calcularConsumoUnidade(unidadeIds, consumos, total_leituras, idUnidade));
+                }
+                break;
+            }
+            case 4:{
+                int mesIni, anoIni, mesFim, anoFim;
+                printf("\nDigite o mes inicial: ");
+                scanf("%d", &mesIni);
+                printf("\nDigite o ano inicial: ");
+                scanf("%d", &anoIni);
+                printf("\nDigite o mes final: ");
+                scanf("%d", &mesFim);
+                printf("\nDigite o ano final: ");
+                scanf("%d", &anoFim);
+
+                if(mesIni < 1 || mesIni > 12 || mesFim < 1 || mesFim > 12 || anoIni * 12 + mesIni > anoFim * 12 + mesFim){
+                    printf("\nPeriodo invalido.\n");
+                }
+                else{
+                    printf("\nConsumo no periodo:\n");
+                    printf("Periodo: %02d/%d ate %02d/%d\n", mesIni, anoIni, mesFim, anoFim);
+                    printf("Consumo total: %.2f kWh\n", calcularConsumoPeriodo(meses, anos, consumos, total_leituras, mesIni, anoIni, mesFim, anoFim));
+                }
+                break;
+            }
+            case 5:{
+                int idMaior = encontrarUnidadeMaiorConsumo(unidadeIds, consumos, total_leituras);
+                if(idMaior == -1){
+                    printf("\nNao ha leituras carregadas.\n");
+                }
+                else{
+                    int j = buscaLinear(unidadeIdsCatalogo, total_unidades, idMaior);
+                    printf("\nUnidade com maior consumo:\n");
+                    printf("Unidade: %d\n", idMaior);
+                    printf("Descricao: %s\n", descricoes[j]);
+                    printf("Consumo total: %.2f kWh\n", calcularConsumoUnidade(unidadeIds, consumos, total_leituras, idMaior));
+                }
+                break;
+            }
+            case 6:
+                printf("\nEncerrando o programa.\n");
+                break;
+            
+            default:
+                printf("\nOpcao invalida. Tente novamente.\n");
+        }
+    } while(opcao != 6);
+
+    return 0;
 }

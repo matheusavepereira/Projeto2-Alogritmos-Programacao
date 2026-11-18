@@ -235,6 +235,7 @@ void quickLeituraPorId(int ids[], int unidadeIds[], int meses[],int anos[],float
 
 }
 
+<<<<<<< HEAD
 void mergeSortLeituraPorId(int ids[], int unidadeIds[], int meses[], int anos[], float consumos[], int inicio, int fim) {
     if (inicio >= fim) {
         return;
@@ -312,6 +313,53 @@ void mergeSortLeituraPorId(int ids[], int unidadeIds[], int meses[], int anos[],
         k++;
     }
 }
+=======
+void merge(int v1[],int n1, int v2[], int n2, int dest[]){
+    int i1 = 0;
+    int i2 = 0;
+    int i = 0;
+    while(i1 < n1 && i2 < n2){
+        if(v1[i1] < v2[i2]){
+            dest[i] = v1[i1];
+            i1++;
+        }
+        else{
+            dest[i] = v2[i2];
+            i2++;
+        }
+    i++;
+    }
+    while(i1 < n1){
+        dest[i] = v1[i1];
+        i1++;
+        i++;
+    }
+    while(i2 < n2){
+        dest[i] = v2[i2];
+        i2++;
+        i++;
+
+    }
+}
+void mergeSortLeituraPorId(int ids[], int unidadeIds[], int meses[],int anos[],float consumos[],int inicio,int fim){
+    if(fim < 2) return;
+
+    int meio = fim / 2;
+    int n1 = meio;
+    int v1[n1];
+    for(int i = 0; i<n1; i++){
+        v1[i] = ids[i];
+    }
+    int n2 = fim - meio;
+    int v2[n2];
+    for(int i = 0; i < n2; i ++){
+        v2[i] = ids[meio + i];
+    }
+
+
+
+}
+>>>>>>> 92b96e9b909c6f4856704fe8c623436308caed53
 int main(){
     carregarUnidades("unidades.csv", unidadeIdsCatalogo, descricoes, MAX);
     for(int i = 0; i < 3; i++ ){
@@ -320,7 +368,11 @@ int main(){
         
     }
     int total_leituras = carregarLeituras("leituras.txt", ids, unidadeIds, meses, anos, consumos, MAX);
+<<<<<<< HEAD
     mergeSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, 0, MAX - 2);
+=======
+    insertionSortLeituraPorId(ids, unidadeIds, meses, anos, consumos, total_leituras);
+>>>>>>> 92b96e9b909c6f4856704fe8c623436308caed53
     for(int i = 0; i < total_leituras; i++){
         printf("%d %d %d %d %.1f \n", ids[i], unidadeIds[i], meses[i], anos[i], consumos[i]);
 
